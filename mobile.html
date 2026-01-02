@@ -3,66 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTi Mobile Prototype V2</title>
+    <title>FIFA 2026 Mobile Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        body { background-color: #0b0e14; color: white; margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; }
-        
-        /* 容器確保 9:16 比例並撐滿螢幕 */
-        .page-step {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            background: #000;
+        body { 
+            background-color: #0b0e14; 
+            color: white; 
+            margin: 0; padding: 0;
+            font-family: sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .img-container {
+        
+        /* 核心容器：確保背景圖可以捲動 */
+        .page-section {
             position: relative;
             width: 100%;
-            height: 100%;
-            max-width: 500px; /* 模擬手機寬度上限 */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .bg-img {
             width: 100%;
-            height: 100%;
-            object-fit: contain; /* 確保 9:16 圖不被裁切 */
+            height: auto;
+            display: block;
         }
 
-        /* 語言切換 - 提高層級 */
-        .lang-toggle {
+        /* 呼吸動態 Icon - 固定在螢幕右下角，確保一定看得到 */
+        @keyframes breathing {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px 10px rgba(251, 191, 36, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+        
+        .fixed-icon {
             position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            background: rgba(255, 191, 36, 0.9);
-            color: #000;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            bottom: 30px;
+            right: 20px;
+            width: 70px;
+            height: 70px;
+            z-index: 999;
+            cursor: pointer;
+            border-radius: 50%;
+            animation: breathing 2s infinite ease-in-out;
+            border: 2px solid rgba(251, 191, 36, 0.5);
         }
 
-        /* 熱點按鈕 - 加上虛線讓您找得到 */
+        /* 入口字樣 - 放在首頁頂部附近 */
+        .entry-text {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            width: 180px;
+            z-index: 100;
+            cursor: pointer;
+        }
+
+        /* 熱點區域：點擊對戰表兩側賽事 */
         .hotspot { 
             position: absolute; 
-            border: 2px dashed rgba(251, 191, 36, 0.8); 
-            background: rgba(251, 191, 36, 0.2); 
+            background: rgba(251, 191, 36, 0.15); 
+            border: 2px dashed #fbbf24;
             z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fbbf24;
-            font-size: 10px;
-            text-align: center;
         }
 
+        /* 彈窗樣式 */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -70,18 +76,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 1000;
             padding: 20px;
-        }
-
-        .error-msg {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ff4444;
-            text-align: center;
-            z-index: 1;
+            backdrop-filter: blur(8px);
         }
 
         .hidden { display: none !important; }
@@ -89,97 +86,71 @@
 </head>
 <body>
 
-    <!-- 右上角語言按鈕 -->
-    <button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN</button>
-
-    <!-- STEP 1: 首頁 (Debet) -->
-    <section id="step-home" class="page-step">
-        <div class="img-container">
-            <div class="error-msg">圖片讀取中或名稱錯誤...</div>
-            <img src="home.png" class="bg-img" onerror="this.previousElementSibling.innerText='找不到 home.png'">
-            
-            <!-- 熱點：Banner 區域 -->
-            <div onclick="showNavModal()" class="hotspot" style="top: 10%; left: 5%; width: 90%; height: 25%;">
-                點擊進入演示
-            </div>
-            
-            <!-- 熱點：底部的 K-Sports 按鈕 -->
-            <div onclick="showNavModal()" class="hotspot" style="top: 48%; left: 5%; width: 44%; height: 18%;">
-                K-SPORTS
-            </div>
-        </div>
-    </section>
-
-    <!-- STEP 2: 對戰表 (CUP 26) -->
-    <section id="step-bracket" class="page-step hidden">
-        <div class="img-container">
-            <div class="error-msg">圖片讀取中...</div>
-            <img src="bracket.png" class="bg-img" onerror="this.previousElementSibling.innerText='找不到 bracket.png'">
-            
-            <!-- 熱點：右側賠率按鈕 (SPA/CRO/ALB) -->
-            <div onclick="openOddsPopup()" class="hotspot" style="top: 18%; right: 5%; width: 35%; height: 12%;">下注 SPA</div>
-            <div onclick="openOddsPopup()" class="hotspot" style="top: 38%; right: 5%; width: 35%; height: 12%;">下注 CRO</div>
-            
-            <button onclick="navTo('step-home')" class="absolute bottom-5 left-1/2 -translate-x-1/2 bg-white/20 px-4 py-1 rounded text-xs" id="ui-back">返回</button>
-        </div>
-    </section>
-
-    <!-- STEP 3: 最終頁 (BTi Slip) -->
-    <section id="step-betting" class="page-step hidden">
-        <div class="img-container">
-            <div class="error-msg">圖片讀取中...</div>
-            <img src="betting_site.png" class="bg-img" onerror="this.previousElementSibling.innerText='找不到 betting_site.png'">
-            
-            <button onclick="navTo('step-home')" class="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white/20 border border-white/30 px-8 py-3 rounded-full text-sm" id="ui-restart">重回首頁</button>
-        </div>
-    </section>
-
-    <!-- 彈窗：方案選擇 -->
+    <!-- 方案選擇彈窗 -->
     <div id="nav-modal" class="modal-overlay hidden">
-        <div class="bg-gray-800 p-8 rounded-3xl border border-gray-700 w-full max-w-xs animate__animated animate__fadeInUp">
-            <h3 class="text-xl font-bold mb-8 text-center text-yellow-500" id="ui-modal-title">請選擇演示路徑</h3>
-            <button onclick="navTo('step-bracket')" class="w-full bg-indigo-600 py-4 rounded-xl mb-4 font-bold">方案 1：活動專區</button>
-            <button onclick="navTo('step-betting')" class="w-full bg-emerald-600 py-4 rounded-xl font-bold">方案 2：直接跳轉</button>
-            <button onclick="closeModals()" class="mt-4 w-full text-gray-500 text-sm" id="ui-cancel">取消</button>
+        <div class="bg-gray-800 p-6 rounded-3xl w-full max-w-xs animate__animated animate__zoomIn">
+            <h3 class="text-xl font-bold mb-6 text-center text-yellow-500">請選擇演示方案</h3>
+            <button onclick="navTo('step-bracket')" class="w-full bg-indigo-600 py-4 rounded-2xl mb-4 font-bold">方案 1：活動專區</button>
+            <button onclick="navTo('step-betting')" class="w-full bg-emerald-600 py-4 rounded-2xl mb-4 font-bold">方案 2：直接下注</button>
+            <button onclick="closeModals()" class="w-full text-gray-400">取消</button>
         </div>
     </div>
 
-    <!-- 彈窗：API 賠率 -->
-    <div id="odds-popup" class="modal-overlay hidden">
-        <div class="bg-[#1e222a] p-2 rounded-2xl w-full max-w-xs text-center">
-            <img src="odds_card.png" class="w-full rounded-xl mb-4" onerror="this.src='https://via.placeholder.com/300x150?text=odds_card.png+Missing'">
-            <button onclick="navTo('step-betting')" class="w-full bg-orange-500 py-4 rounded-xl font-bold italic" id="ui-bet">BET NOW</button>
+    <!-- 1. 手機首頁 -->
+    <section id="step-home" class="page-section">
+        <img src="mobile_home.png" class="bg-img" alt="請確認檔名為 mobile_home.png">
+        <!-- 入口字樣 -->
+        <img src="text_entry.png" onclick="showNavModal()" class="entry-text" alt="text_entry.png">
+        <!-- 固定呼吸 Icon -->
+        <img src="icon.png" onclick="showNavModal()" class="fixed-icon" alt="icon.png">
+    </section>
+
+    <!-- 2. 手機對戰表 -->
+    <section id="step-bracket" class="page-section hidden animate__animated animate__fadeIn">
+        <img src="mobile_bracket.png" class="bg-img" alt="請確認檔名為 mobile_bracket.png">
+        
+        <!-- 熱點區域 (對戰表兩側) -->
+        <!-- 左側賽事方塊 (SPA/CRO 等) -->
+        <div onclick="navTo('step-betting')" class="hotspot" style="top: 15%; left: 5%; width: 30%; height: 10%;"></div>
+        <div onclick="navTo('step-betting')" class="hotspot" style="top: 35%; left: 5%; width: 30%; height: 10%;"></div>
+        
+        <!-- 右側賽事方塊 (SPA/CRO 等) -->
+        <div onclick="navTo('step-betting')" class="hotspot" style="top: 15%; right: 5%; width: 30%; height: 10%;"></div>
+        <div onclick="navTo('step-betting')" class="hotspot" style="top: 35%; right: 5%; width: 30%; height: 10%;"></div>
+
+        <!-- 返回按鈕 -->
+        <div class="p-10 text-center">
+            <button onclick="navTo('step-home')" class="text-gray-500 underline">返回首頁</button>
         </div>
-    </div>
+    </section>
+
+    <!-- 3. 手機下注單 (最終頁) -->
+    <section id="step-betting" class="page-section hidden animate__animated animate__fadeIn">
+        <img src="mobile_betting.png" class="bg-img shadow-2xl" alt="請確認檔名為 mobile_betting.png">
+        <div class="p-10 text-center">
+            <button onclick="navTo('step-home')" class="bg-yellow-600 px-8 py-3 rounded-full font-bold">完成演示，回首頁</button>
+        </div>
+    </section>
 
     <script>
-        const langData = {
-            zh: { modalTitle: '請選擇演示路徑', cancel: '取消', back: '返回', restart: '重新演示', bet: '立即投注', btn: 'EN' },
-            en: { modalTitle: 'Select Path', cancel: 'Cancel', back: 'Back', restart: 'Restart', bet: 'Bet Now', btn: '中' }
-        };
-
-        let currentLang = 'zh';
-
-        function toggleLang() {
-            currentLang = (currentLang === 'zh') ? 'en' : 'zh';
-            document.getElementById('ui-modal-title').innerText = langData[currentLang].modalTitle;
-            document.getElementById('ui-cancel').innerText = langData[currentLang].cancel;
-            document.getElementById('ui-back').innerText = langData[currentLang].back;
-            document.getElementById('ui-restart').innerText = langData[currentLang].restart;
-            document.getElementById('ui-bet').innerText = langData[currentLang].bet;
-            document.getElementById('langBtn').innerText = langData[currentLang].btn;
+        function showNavModal() {
+            document.getElementById('nav-modal').classList.remove('hidden');
         }
 
-        function showNavModal() { document.getElementById('nav-modal').classList.remove('hidden'); }
-        function openOddsPopup() { document.getElementById('odds-popup').classList.remove('hidden'); }
         function closeModals() {
             document.getElementById('nav-modal').classList.add('hidden');
-            document.getElementById('odds-popup').classList.add('hidden');
         }
-        function navTo(id) {
+
+        function navTo(stepId) {
+            // 隱藏所有 Section
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
             closeModals();
+            
+            // 顯示目標
+            document.getElementById(stepId).classList.remove('hidden');
+            
+            // 手機版換頁後自動滾回頂部
+            window.scrollTo(0, 0);
         }
     </script>
 </body>
