@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BTi FIFA 2026 Mobile Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body { 
+            background-color: #0b0e14; 
+            color: white; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊藍色陰影 */
+        }
+        
+        /* 針對手機圖片的容器 */
+        .image-container { 
+            position: relative; 
+            width: 100%; 
+            background: #1e293b;
+            min-height: 100vh;
+        }
+
+        .image-container img.bg-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 呼吸動態效果 - 手機版稍微縮小一點避免擋住內容 */
+        @keyframes breathing {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px 5px rgba(251, 191, 36, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+        
+        .breathing-icon {
+            position: absolute;
+            width: 70px; /* 手機版尺寸調整 */
+            bottom: 30px;
+            right: 20px; /* 移動到右下角，適合單手點擊 */
+            cursor: pointer;
+            z-index: 60;
+            border-radius: 50%;
+            animation: breathing 2s infinite ease-in-out;
+        }
+
+        /* 入口字樣動態 */
+        .text-entry-btn {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            width: 180px; /* 手機版尺寸調整 */
+            cursor: pointer;
+            z-index: 60;
+        }
+
+        /* 熱點區域 - 手機版放大點擊範圍 */
+        .hotspot { 
+            position: absolute; 
+            border: 2px dashed rgba(251, 191, 36, 0.6); 
+            background: rgba(251, 191, 36, 0.15); 
+            z-index: 50;
+        }
+
+        /* 彈窗遮罩 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* 讓按鈕在手機上更好按 */
+        .mobile-btn {
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STEP 1: 首頁 -->
+    <section id="step-home">
+        <div class="image-container">
+            <img src="home.png" alt="home" class="bg-img">
+            
+            <!-- 入口字樣 -->
+            <img src="text_entry.png" onclick="showNavModal()" alt="World Cup Entry" class="text-entry-btn">
+            
+            <!-- 呼吸動態 Icon -->
+            <img src="icon.png" onclick="showNavModal()" alt="icon" class="breathing-icon">
+        </div>
+    </section>
+
+    <!-- STEP 2: 活動對戰表 (方案 1) -->
+    <section id="step-bracket" class="hidden">
+        <div class="image-container">
+            <img src="bracket.png" alt="bracket" class="bg-img">
+            
+            <!-- 手機版熱點：放大寬度，方便手指點擊 -->
+            <!-- 左側賽事 -->
+            <div onclick="openOddsPopup()" class="hotspot" style="top: 18%; left: 2%; width: 22%; height: 15%; border-radius: 10px;"></div>
+            <div onclick="openOddsPopup()" class="hotspot" style="top: 38%; left: 2%; width: 22%; height: 15%; border-radius: 10px;"></div>
+            
+            <!-- 右側賽事 -->
+            <div onclick="openOddsPopup()" class="hotspot" style="top: 18%; right: 2%; width: 22%; height: 15%; border-radius: 10px;"></div>
+            <div onclick="openOddsPopup()" class="hotspot" style="top: 38%; right: 2%; width: 22%; height: 15%; border-radius: 10px;"></div>
+            
+            <!-- 底部返回按鈕 (手機版專用) -->
+            <div class="p-6 text-center">
+                <button onclick="navTo('step-home')" class="text-gray-400 underline">返回首頁重選</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- STEP 3: 最終投注頁 -->
+    <section id="step-betting" class="hidden">
+        <div class="image-container">
+            <img src="betting_site.png" alt="betting" class="bg-img border-b-4 border-indigo-600">
+            <div class="p-8 text-center">
+                <button onclick="navTo('step-home')" class="bg-gray-800 px-6 py-3 rounded-full text-white">回首頁重新演示</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 彈窗 1：路徑選擇 -->
+    <div id="nav-modal" class="modal-overlay hidden">
+        <div class="bg-gray-800 p-6 rounded-3xl border border-gray-700 w-full max-w-sm animate__animated animate__fadeInUp">
+            <h3 class="text-xl font-bold mb-6 text-center text-yellow-500">請選擇演示方案</h3>
+            <div class="flex flex-col">
+                <button onclick="navTo('step-bracket')" class="mobile-btn bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg">
+                    方案 1：活動專區
+                    <p class="text-xs font-normal opacity-70">查看對戰表與 Whale API</p>
+                </button>
+                <button onclick="navTo('step-betting')" class="mobile-btn bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg">
+                    方案 2：直接跳轉
+                    <p class="text-xs font-normal opacity-70">進入 BTi 完整投注盤口</p>
+                </button>
+            </div>
+            <button onclick="closeModals()" class="mt-4 text-gray-400 w-full text-center py-2">取消</button>
+        </div>
+    </div>
+
+    <!-- 彈窗 2：Odds Card Popup -->
+    <div id="odds-popup" class="modal-overlay hidden">
+        <div class="relative bg-[#1e222a] p-2 rounded-2xl shadow-2xl w-full max-w-sm animate__animated animate__zoomIn">
+            <div class="flex justify-between items-center p-3 border-b border-gray-700 mb-2">
+                <span class="text-xs font-bold text-blue-400">WHALE API FEED</span>
+                <button onclick="closeModals()" class="text-gray-400 text-2xl px-2">&times;</button>
+            </div>
+            <img src="odds_card.png" alt="odds card" class="w-full rounded-xl">
+            <div class="p-4">
+                <button onclick="navTo('step-betting')" class="w-full bg-orange-500 text-white py-4 rounded-xl font-black text-lg shadow-xl active:scale-95 transition-transform">
+                    立即投注
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showNavModal() {
+            document.getElementById('nav-modal').classList.remove('hidden');
+        }
+
+        function openOddsPopup() {
+            document.getElementById('odds-popup').classList.remove('hidden');
+        }
+
+        function closeModals() {
+            document.getElementById('nav-modal').classList.add('hidden');
+            document.getElementById('odds-popup').classList.add('hidden');
+        }
+
+        function navTo(stepId) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            closeModals();
+            document.getElementById(stepId).classList.remove('hidden');
+            window.scrollTo(0, 0); // 確保跳轉後回到頁面頂部
+        }
+    </script>
+</body>
+</html>
